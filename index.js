@@ -1,7 +1,8 @@
 var express = require('express'),
     api = require('./lib/api'),
     utils = require('./lib/utils'),
-    proxy = express();
+    proxy = express(),
+    restbus = {};
 
 // Configuration & Middleware
 if(proxy.get('env') === 'development') {
@@ -45,5 +46,10 @@ proxy.get('/agencies/:agency/tuples/:tuples/predictions', api.predictions.tuples
 proxy.get('/agencies/:agency/routes/:route/stops/:stop/predictions', api.predictions.get);
 proxy.get('/locations/:latlon/predictions', api.predictions.location);
 
-// Return an object with a 'listen' method to start the proxy on given port.
-module.exports = { listen: function(port) { proxy.listen(port || '3535'); } };
+restbus.listen = function(port) {
+  var p = port || '3535';
+
+  proxy.listen(p, function() { console.log('restbus started and listening on port ' + p); });
+};
+
+module.exports = restbus;
