@@ -1,26 +1,33 @@
-var express = require('express'),
+var http = require('http'),
+    express = require('express'),
     api = require('./lib/api'),
     utils = require('./lib/utils'),
-    proxy = express(),
+    app = express(),
+    proxy = http.createServer(app),
+    sockets = [],
+    listening = false,
+    demo = false,
     restbus = {};
 
+function addSocket(socket) { sockets.push(socket); }
+
 // Configuration & Middleware
-if(proxy.get('env') === 'development') {
-  proxy.use(express.logger('dev'));
-  proxy.use(express.errorHandler({showStack: true, dumpExceptions: true}));
-  proxy.use(function(err, req, res, next) {
+if(app.get('env') === 'development') {
+  app.use(express.logger('dev'));
+  app.use(express.errorHandler({showStack: true, dumpExceptions: true}));
+  app.use(function(err, req, res, next) {
     console.error(err.stack);
     res.json(500, utils.errors.get(500, 'The server encountered an unexpected condition: ' + err.message));
   });
 } else {
-  proxy.use(express.logger());
-  proxy.use(function(err, req, res, next) {
+  app.use(express.logger());
+  app.use(function(err, req, res, next) {
     res.json(500, utils.errors.get(500, 'The server encountered an unexpected condition: ' + err.message));
   });
 }
 
-proxy.use(express.compress());
-proxy.use(function(req, res, next) {
+app.use(express.compress());
+app.use(function(req, res, next) {
   res.set({// No client caching
     'Expires': 'Sat, 01 Jan 2000 08:00:00 GMT',
     'Last-Modified': new Date().toUTCString(),
@@ -28,28 +35,81 @@ proxy.use(function(req, res, next) {
   });
   next();
 });
-proxy.use(proxy.router);
-proxy.use(function(req, res, next) {
+app.use(app.router);
+app.use(function(req, res, next) {
   res.json(404, utils.errors.get(404, 'The requested URI can not be found on this server.'));
 });
 
 // Routing (only GET requests supported)
-proxy.get('/agencies', api.agencies.list);
-proxy.get('/agencies/:agency', api.agencies.get);
-proxy.get('/agencies/:agency/routes', api.routes.list);
-proxy.get('/agencies/:agency/routes/:route', api.routes.get);
-proxy.get('/agencies/:agency/vehicles', api.vehicles.list);
-proxy.get('/agencies/:agency/vehicles/:vehicle', api.vehicles.get);
-proxy.get('/agencies/:agency/routes/:route/vehicles', api.vehicles.routelist);
-proxy.get('/agencies/:agency/stops/:code/predictions', api.predictions.list);
-proxy.get('/agencies/:agency/tuples/:tuples/predictions', api.predictions.tuples);
-proxy.get('/agencies/:agency/routes/:route/stops/:stop/predictions', api.predictions.get);
-proxy.get('/locations/:latlon/predictions', api.predictions.location);
+app.get('/agencies', api.agencies.list);
+app.get('/agencies/:agency', api.agencies.get);
+app.get('/agencies/:agency/routes', api.routes.list);
+app.get('/agencies/:agency/routes/:route', api.routes.get);
+app.get('/agencies/:agency/vehicles', api.vehicles.list);
+app.get('/agencies/:agency/vehicles/:vehicle', api.vehicles.get);
+app.get('/agencies/:agency/routes/:route/vehicles', api.vehicles.routelist);
+app.get('/agencies/:agency/stops/:code/predictions', api.predictions.list);
+app.get('/agencies/:agency/tuples/:tuples/predictions', api.predictions.tuples);
+app.get('/agencies/:agency/routes/:route/stops/:stop/predictions', api.predictions.get);
+app.get('/locations/:latlon/predictions', api.predictions.location);
 
-restbus.listen = function(port) {
-  var p = port || '3535';
+/**
+ * Method for starting restbus.
+ *
+ * @param {String:port} The port to start restbus on. Optional, defaults to '3535'.
+ * @param {Function:callback} An optional callback for the 'listening' event.
+ */
+restbus.listen = function(port, callback) {
+  var p, cb;
 
-  proxy.listen(p, function() { console.log('restbus started and listening on port ' + p); });
+  if(typeof port === 'function') {
+    p = '3535';
+    cb = port;
+  } else {
+    p = port || '3535';
+    cb = typeof callback === 'function' ? callback : function() {};
+  }
+
+  if((arguments.length === 3) && (arguments[2] === true)) {
+    demo = true;
+    proxy.on('connection', addSocket);
+  }
+
+  if(listening) {
+    cb(p);
+  } else {
+    proxy.listen(p, function() {
+      listening = true;
+      cb(p);
+    });
+  }
+};
+
+restbus.close = function(callback) {
+  var cb = typeof callback === 'function' ? callback : function() {};
+
+  if(!demo) restbus.close = function() {console.log('Can only call restbus.close() once!')};
+
+  if(!listening) {
+    cb();
+  } else {
+    proxy.close(function() {
+      listening = false;
+      cb();
+    });
+    if(demo) {
+      demo = false;
+      proxy.removeListener('connection', addSocket);
+      sockets.forEach(function(socket) {
+        if(socket) socket.destroy();
+      });
+      sockets = [];
+    }
+  }
+};
+
+restbus.isListening = function() {
+  return listening;
 };
 
 module.exports = restbus;
