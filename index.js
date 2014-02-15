@@ -28,7 +28,8 @@ if(app.get('env') === 'development') {
 
 app.use(express.compress());
 app.use(function(req, res, next) {
-  res.set({// No client caching
+  res.set({
+    'Access-Control-Allow-Origin': '*',
     'Expires': 'Sat, 01 Jan 2000 08:00:00 GMT',
     'Last-Modified': new Date().toUTCString(),
     'Cache-Control': 'max-age=0, no-cache, must-revalidate, proxy-revalidate'
