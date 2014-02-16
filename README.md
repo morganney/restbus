@@ -10,7 +10,7 @@ components to the web:
 * REST
 * JSON
 
-To interface with the NextBus Inc. XML feed over a RESTful JSON API, install and use **restbus** as a proxy server for
+To interface with the NextBus Inc. XML feed over a RESTful JSON API, install and use [restbus][0] as a proxy server for
 your application.
 
 All documentation is hosted at [restbus.info][0].
