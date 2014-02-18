@@ -21,8 +21,7 @@
     "api",
     "rest",
     "json",
-    "proxy",
-    "xml"
+    "proxy"
   ],
   "bugs": {
     "url": "https://github.com/morganney/restbus/issues"
