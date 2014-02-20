@@ -28,17 +28,34 @@ if(app.get('env') === 'development') {
 
 app.use(express.compress());
 app.use(function(req, res, next) {
-  res.set({
-    'Access-Control-Allow-Origin': '*',
-    'Expires': 'Sat, 01 Jan 2000 08:00:00 GMT',
-    'Last-Modified': new Date().toUTCString(),
-    'Cache-Control': 'max-age=0, no-cache, must-revalidate, proxy-revalidate'
-  });
-  next();
+  if(req.method.toLowerCase() === 'options') {
+    res.set({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET,OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type,Content-Length,X-Requested-With',
+      'Access-Control-Allow-Credentials': false,
+      'Allow': 'GET'
+    });
+    res.send(200);
+  } else {
+    res.set({
+      'Access-Control-Allow-Origin': '*',
+      'Expires': 'Sat, 01 Jan 2000 08:00:00 GMT',
+      'Last-Modified': new Date().toUTCString(),
+      'Cache-Control': 'max-age=0, no-cache, must-revalidate, proxy-revalidate'
+    });
+    next();
+  }
 });
 app.use(app.router);
 app.use(function(req, res, next) {
-  res.json(404, utils.errors.get(404, 'The requested URI can not be found on this server.'));
+  var method = req.method;
+
+  if(method.toLowerCase() !== 'get') {
+    res.json(405, utils.errors.get(405, 'HTTP method ' + method + ' is not supported by this URI resource.'));
+  } else {
+    res.json(404, utils.errors.get(404, 'The requested URI can not be found on this server.'));
+  }
 });
 
 // Routing (only GET requests supported)
