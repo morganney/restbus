@@ -11,6 +11,8 @@ var http = require('http'),
 
 function addSocket(socket) { sockets.push(socket); }
 
+app.enable('trust proxy');
+
 // Configuration & Middleware
 if(app.get('env') === 'development') {
   app.use(express.logger('dev'));
