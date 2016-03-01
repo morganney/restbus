@@ -1,5 +1,5 @@
-restbus
-=======
+[restbus][0]
+============
 
 Converts the [NextBus Inc. XML feed][1] into a RESTful JSON API.
 
