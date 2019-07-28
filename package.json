@@ -1,14 +1,14 @@
 {
   "name": "restbus",
   "description": "RESTful JSON API for the NextBus Inc. public XML feed.",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "main": "index",
   "dependencies": {
     "compression": "1.7.4",
     "errorhandler": "1.5.0",
-    "express": "4.16.4",
+    "express": "4.17.1",
     "morgan": "1.9.1",
-    "xml2js": "0.4.17"
+    "xml2js": "0.4.19"
   },
   "engines": {
     "node": ">= 0.8.0"
