@@ -1,16 +1,11 @@
-name: CI
+name: Deploy
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
-  ci:
-    name: CI
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -39,4 +34,3 @@ jobs:
           aws_region: ${{ secrets.AWS_REGION }}
           function_name: restbus
           zip_file: dist/restbus.zip
-          dry_run: true
