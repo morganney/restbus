@@ -3,10 +3,10 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   ci:
@@ -29,3 +29,14 @@ jobs:
           path: npm-debug.log
       - name: Build
         run: npm run build
+      - name: Zip
+        run: npm run zip
+      - name: AWS Lambda Deploy
+        uses: appleboy/lambda-action@v0.1.9
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: ${{ secrets.AWS_REGION }}
+          function_name: restbus
+          zip_file: dist/restbus.zip
+          dry_run: true

@@ -46,7 +46,8 @@
     "prettier": "prettier -w .",
     "start": "node index.js run",
     "dev": "node --watch index.js run",
-    "build": "NODE_ENV=production webpack"
+    "build": "NODE_ENV=production webpack",
+    "zip": "cd dist && zip restbus.zip index.js"
   },
   "prettier": {
     "arrowParens": "avoid",
