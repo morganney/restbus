@@ -1,0 +1,103 @@
+# Usage: `sam local invoke restbus`
+#
+# AWS console UI -> Lambda (Functions -> restbus) -> Download -> Download AWS SAM File
+# (renamed to template.yaml).
+# Used for testing Lambda function locally.
+#
+# NOTE: AWS API Gateway does not support ',' (commas) in path segmenst, so tuples
+# and locations implementation uses '_' (underscore) on AWS API Gateway!
+
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: An AWS Serverless Application Model template describing your function.
+Resources:
+  restbus:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Description: ''
+      MemorySize: 128
+      Timeout: 3
+      # Modified for using SAM CLI locally after a build
+      Handler: dist/index.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      PackageType: Zip
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+              Resource: arn:aws:logs:us-west-2:601077199463:*
+            - Effect: Allow
+              Action:
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource:
+                - >-
+                  arn:aws:logs:us-west-2:601077199463:log-group:/aws/lambda/restbus:*
+      SnapStart:
+        ApplyOn: None
+      Events:
+        Api1:
+          Type: Api
+          Properties:
+            Path: /agencies/omnitrans
+            Method: ANY
+        Api2:
+          Type: Api
+          Properties:
+            Path: /agencies
+            Method: ANY
+        Api3:
+          Type: Api
+          Properties:
+            Path: /agencies/omnitrans/routes
+            Method: ANY
+        Api4:
+          Type: Api
+          Properties:
+            Path: /agencies/omnitrans/vehicles
+            Method: ANY
+        Api5:
+          Type: Api
+          Properties:
+            Path: /agencies/omnitrans/routes/1/vehicles
+            Method: ANY
+        Api6:
+          Type: Api
+          Properties:
+            Path: /agencies/omnitrans/routes/1
+            Method: ANY
+        Api7:
+          Type: Api
+          Properties:
+            Path: /agencies/omnitrans/routes/1/stops/5303/predictions
+            Method: ANY
+        Api8:
+          Type: Api
+          Properties:
+            Path: /agencies/omnitrans/stops/5303/predictions
+            Method: ANY
+        Api9:
+          Type: Api
+          Properties:
+            Path: /agencies/omnitrans/vehicles/1347
+            Method: ANY
+        Api10:
+          Type: Api
+          Properties:
+            Path: /locations/37.784825_-122.395592/predictions
+            Method: ANY
+        Api11:
+          Type: Api
+          Properties:
+            Path: /agencies/omnitrans/tuples/1:5303_2:5423/predictions
+            Method: ANY
+      RuntimeManagementConfig: {}

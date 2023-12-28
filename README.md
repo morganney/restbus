@@ -1,5 +1,4 @@
-[restbus][0]
-============
+# [restbus][0]
 
 Converts the [NextBus][1] [Public XML Feed][2], which is used to build real-time transit applications, into a RESTful JSON API.
 
