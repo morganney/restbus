@@ -2,7 +2,7 @@
   "name": "restbus",
   "description": "RESTful JSON API for the NextBus Inc. public XML feed.",
   "version": "2.4.1",
-  "main": "index",
+  "main": "index.js",
   "dependencies": {
     "compression": "1.7.4",
     "express": "4.18.2",
@@ -40,7 +40,7 @@
   },
   "license": "MIT",
   "files": [
-    "dist"
+    "lib"
   ],
   "scripts": {
     "prettier": "prettier -w .",
