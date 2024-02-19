@@ -1,3 +1,4 @@
 *.log
+*.tgz
 node_modules
 dist

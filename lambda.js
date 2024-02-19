@@ -1,5 +1,5 @@
 /**
- * Used by restbus.info domain for hosting documentation about restbus.
+ * Used by morganney.github.io/restbus.info domain for hosting documentation about restbus.
  */
 const serverlessExpress = require('@codegenie/serverless-express');
 const restbus = require('./lib/restbus');

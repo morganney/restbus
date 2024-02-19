@@ -1,11 +1,12 @@
-name: Deploy
+name: Publish
 
 on:
-  workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
-  deploy:
-    name: Deploy
+  publish:
+    if: contains('["morganney"]', github.actor)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,15 +23,10 @@ jobs:
         with:
           name: npm-debug-log-${{ hashFiles('package-lock.json') }}
           path: npm-debug.log
-      - name: Build
-        run: npm run build
-      - name: Zip
-        run: npm run zip
-      - name: AWS Lambda Deploy
-        uses: appleboy/lambda-action@v0.1.9
+      - name: Pack
+        run: npm pack
+      - name: Push to NPM registry
+        uses: JS-DevTools/npm-publish@v3.0.1
         with:
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_region: ${{ secrets.AWS_REGION }}
-          function_name: restbus
-          zip_file: dist/restbus.zip
+          token: ${{ secrets.NPM_AUTH_TOKEN }}
+          tag: ${{ contains(github.ref, '-') && 'next' || 'latest' }}
